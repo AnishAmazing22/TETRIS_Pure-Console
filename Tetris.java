@@ -1,8 +1,4 @@
 import java.util.Scanner;
-import java.awt.AWTException;
-import java.awt.Robot;
-import java.awt.event.KeyEvent;
-import java.io.*;
 
 /**
  * class that creates the Tetris game
@@ -16,13 +12,20 @@ public class Tetris {
     private static Block block;
     private static int[] finished = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     private static int score;
-    
+    private static Shadow shadow;
     /**
      * runs the game
     */
     public static void run(){
+        if(!(Runner.easy)){
+            speed=2;
+        }
+        
         //creates the block object
         block = new Block();
+        shadow = new Shadow();
+        
+        shadow.pos = deepCopy2DArray(block.pos);
         
         System.out.println("start");
         
@@ -38,25 +41,36 @@ public class Tetris {
         int sped = speed;
         
         while(!(input.equals("m"))){
+           
+            
+            
             //starts setting speed
             speed = sped;
             //takes the input
             input = in.nextLine();
             //takes key pressed and executes a movement
-            if(input.equals("a")){
+            if(input.equals("a")||input.equals("aa")){
                 block.move(-1);
-            }else if(input.equals("d")){
+            }else if(input.equals("d")||input.equals("dd")){
                 block.move(1);
-            }else if(input.equals("w")){
+            }else if(input.equals("w")||input.equals("ww")){
                 block.rotate();
-            }else if(input.equals("s")){
+            }else if(input.equals("s")||input.equals("ss")){
                 speed = 1;
+            }else if(input.equals(" ")){
+                while(!(touching())){
+                    block.update();
+                }
             }
             //moves the block back in screen if it went over
             edge();
             edge();
             edge();
             
+            shadow.pos = deepCopy2DArray(block.pos);
+            while(!(touch())){
+                shadow.fall();
+            }
             //checks if block is touching other blocks and creates a new block if so
             if(touching()){
                 for(int i=0;i<4;i++){
@@ -68,8 +82,9 @@ public class Tetris {
                 block.create();
             }
             //speeds up the game when the score is a multiple of 10
-            if((score%10) == 0&&sped!=1&&score!=0){
+            if((time%500) == 0&&sped!=1&&time!=0){
                 sped--;
+                System.out.println("Speed up");
             }
             //prints the screen
             screen();
@@ -82,6 +97,7 @@ public class Tetris {
     */
     public static void screen(){
         //prints the score and top of the screen
+        System.out.println("TIME: "+time);
         System.out.println("SCORE: "+score);
         System.out.println("__________________________");
         
@@ -100,6 +116,8 @@ public class Tetris {
                         if(screen[i][j]==1){
                             counter++;
                         }
+                    }else if(check2(j, i)&&Runner.easy){
+                        System.out.print("--");
                     }else{
                         System.out.print("  ");
                     }
@@ -145,12 +163,33 @@ public class Tetris {
         return (((block.pos[0][0]==x&&block.pos[0][1]==y)||(block.pos[1][0]==x&&block.pos[1][1]==y)||(block.pos[2][0]==x&&block.pos[2][1]==y)||(block.pos[3][0]==x&&block.pos[3][1]==y))||(screen[y][x]==1));
     }
     /**
+     * checks if the current position is a shadow position
+     * @param x x-coord of the shadow block
+     * @ param y y-coord of the shadow block
+     * @return returns if there is a shadow block in that location
+    */
+    public static boolean check2(int x, int y){
+        return (((shadow.pos[0][0]==x&&shadow.pos[0][1]==y)||(shadow.pos[1][0]==x&&shadow.pos[1][1]==y)||(shadow.pos[2][0]==x&&shadow.pos[2][1]==y)||(shadow.pos[3][0]==x&&shadow.pos[3][1]==y)));
+    }
+    /**
      * checks if the block is touching other blocks on the bottom
      * @return returns if it is touching a block underneath
     */
     public static boolean touching(){
         for(int i=0;i<4;i++){
             if((screen[block.pos[i][1]+1][(block.pos[i][0])])==1){
+                return true;
+            }
+        }
+        return false;
+    }
+    /**
+     * the touching method but for the shadow
+     * @return whether it is touching or not
+    */
+    public static boolean touch(){
+        for(int i=0;i<4;i++){
+            if((screen[shadow.pos[i][1]+1][(shadow.pos[i][0])])==1){
                 return true;
             }
         }
@@ -169,5 +208,22 @@ public class Tetris {
                 System.out.println("stop");
             }
         }
+    }
+    /**
+     * creates a copy of the block to assign to the shadow
+     * I did this because it was creating a reference when I was trying to assign it
+     * @param original the array to copy
+     * @return returns the copy of the array
+    */
+    public static int[][] deepCopy2DArray(int[][] original) {
+        if (original == null) {
+            return null; // Handle null case
+        }
+    
+        int[][] copy = new int[original.length][]; // Create a new 2D array
+        for (int i = 0; i < original.length; i++) {
+            copy[i] = original[i].clone(); // Clone each row
+        }
+        return copy;
     }
 }
