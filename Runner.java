@@ -10,7 +10,7 @@ public class Runner
     */
     public static void main(String[] args) 
     {
-        System.out.println("Welcome to Tetris!\n\nControls:\n1. ENTER: progress a tick\n2. A: move left\n3. D: move right\n4. S or hold ENTER: move down\n5. SPACE: drop block\n");
+        System.out.println("Welcome to Tetris!\n\nControls:\n1. ENTER: progress a tick\n2. A: move left\n3. D: move right\n4. W: rotate\n5. S or hold ENTER: move down\n6. SPACE: drop block\n");
         System.out.println("Spam ENTER at a consistent, high speed to play properly\n");
         
         Scanner scanner = new Scanner(System.in);
